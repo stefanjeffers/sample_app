@@ -1,7 +1,8 @@
 class UsersController < ApplicationController
-  before_filter :authenticate, :only => [:index, :edit, :update]
-  before_filter :correct_user, :only => [:edit, :update]
-  before_filter :admin_user,   :only => :destroy
+  before_filter :authenticate,  :only => [:index, :edit, :update]
+  before_filter :correct_user,  :only => [:edit, :update]
+  before_filter :admin_user,    :only =>  :destroy
+  before_filter :signedin_user, :only => [:new, :create]
 
   def index
     @title = "All users"
@@ -56,22 +57,42 @@ class UsersController < ApplicationController
     redirect_to users_path
   end
 
+    # Should this be private? 
+  def show
+    @user = User.find(params[:id])
+    @microposts = @user.microposts.paginate(:page => params[:page])
+    @title = @user.name
+  end
+
   private
 
-    def authenticate
-      deny_access unless signed_in?
+    # def authenticate
+    #   deny_access unless signed_in?
+    # end
+
+    def signedin_user
+      # @user = User.find(params[:id])
+      # redirect_to(root_path) if current_user?(@user)
+      deny_reentrance if signed_in?
     end
 
     def correct_user
       @user = User.find(params[:id])
       redirect_to(root_path) unless current_user?(@user)
     end
+
         # This is changed from the tutorial version
-	# because was seeing current_user undefined in the "non-signed-in user" case.
+	# because we were seeing current_user undefined in the "non-signed-in user" test case.
     def admin_user
       if current_user
         if !current_user.admin?
           redirect_to(root_path)
+        else
+          @user = User.find(params[:id])
+          if @user == current_user
+            flash[:failure] = "Warning: Attempt to destroy yourself as admin user is disallowed."
+            redirect_to users_path
+          end
         end
       else
         redirect_to(signin_path)

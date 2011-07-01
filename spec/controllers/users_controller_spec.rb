@@ -53,6 +53,40 @@ describe UsersController do
         response.should have_selector("a", :href => "/users?page=2",
                                            :content => "Next")
       end
+
+      it "should not show the delete link" do
+        get :index
+          # @users[0..2].each do |user|
+            response.should_not have_selector("a", :href => "/users/2",
+                                                   :content => "delete")
+          # end
+          #  | <%= link_to "delete", user, :method => :delete, :confirm => "You sure?",
+          #                     :title => "Delete #{user.name}" %>
+      end
+    end
+
+    describe "for signed-in admin users" do
+
+      before(:each) do
+        # @user = test_sign_in(Factory(:user))
+        @user  = Factory(:user, :email => "admin@example.com", :admin => true)
+        admin  = test_sign_in( @user )
+        second = Factory(:user, :name => "Bob", :email => "another@example.com")
+        third  = Factory(:user, :name => "Ben", :email => "another@example.net")
+        @users = [@user, second, third]
+      end
+
+      it "should show the delete link" do
+        get :index
+          # @users[0..2].each do |user|
+            response.should have_selector("a", :href => "/users/2",
+                                             # :method => "delete")
+                                               :content => "delete")
+          # end
+          #  | <%= link_to "delete", user, :method => :delete, :confirm => "You sure?",
+          #                     :title => "Delete #{user.name}" %>
+      end
+
     end
   end
 
@@ -85,6 +119,14 @@ describe UsersController do
     it "should have a profile image" do
       get :show, :id => @user
       response.should have_selector("h1>img", :class => "gravatar")
+    end
+
+    it "should show the user's microposts" do
+      mp1 = Factory(:micropost, :user => @user, :content => "Foo bar")
+      mp2 = Factory(:micropost, :user => @user, :content => "Baz quux")
+      get :show, :id => @user
+      response.should have_selector("span.content", :content => mp1.content)
+      response.should have_selector("span.content", :content => mp2.content)
     end
   end
 
@@ -252,6 +294,38 @@ describe UsersController do
     end
   end
 
+  describe "justification for new/create page access" do
+
+    before(:each) do
+    # @user = test_sign_in(Factory(:user))
+      @user = Factory(:user)
+      test_sign_in(@user)
+    # @attr = { :name => "", :email => "", :password => "",
+    #           :password_confirmation => "" }
+    end
+
+    #  it "should not create a user" do
+    #    lambda do
+    #      post :create, :user => @attr
+    #    end.should_not change(User, :count)
+    #  end
+
+    describe "for signed-in users" do
+
+      it "should deny access to 'new'" do
+        get :new
+        response.should redirect_to(root_path)
+      end
+
+      it "should deny access to 'create'" do
+      # post :create
+        post :create, :id => @user
+        response.should redirect_to(root_path)
+      end
+    end
+    
+  end
+
   describe "authentication of edit/update pages" do
 
     before(:each) do
@@ -317,6 +391,7 @@ describe UsersController do
       before(:each) do
         admin = Factory(:user, :email => "admin@example.com", :admin => true)
         test_sign_in(admin)
+	@users = [admin]
       end
 
       it "should destroy the user" do
@@ -325,6 +400,12 @@ describe UsersController do
         end.should change(User, :count).by(-1)
       end
       
+      it "should not destroy this admin user" do
+        lambda do
+          delete :destroy, :id => @users[0]
+        end.should_not change(User, :count)
+      end
+
       it "should redirect to the users index page" do
         delete :destroy, :id => @user
         response.should redirect_to(users_path)
