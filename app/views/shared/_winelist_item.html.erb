@@ -1,0 +1,22 @@
+<tr>
+  <td class="gravatar">
+    <!-- %= link_to gravatar_for(winelist_item.user), winelist_item.user % -->
+  </td>
+  <td class="micropost">
+    <span class="user">
+      <%= link_to winelist_item.user.name, winelist_item.user %>
+    </span>
+    <span class="content"><%= winelist_item.content %></span>
+    <span class="timestamp">
+      Posted <%= time_ago_in_words(winelist_item.created_at) %> ago.
+    </span>
+  </td>
+  <% if current_user?(winelist_item.user) %>
+  <td>
+    <%= link_to "delete", winelist_item, :method => :delete,
+                                     :confirm => "You sure?",
+                                     :title => winelist_item.content %>
+  </td>
+  <% end %>
+</tr>
+

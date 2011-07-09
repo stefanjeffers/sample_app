@@ -5,7 +5,7 @@ require File.expand_path('../config/application', __FILE__)
 
 # require 'rake/dsl_definition'
 
-module ::SampleApp
+module ::WineApp
   class Application
   #  include Rake::DSL
   end
@@ -13,4 +13,5 @@ end
 
 require 'rake'
 
-SampleApp::Application.load_tasks
+WineApp::Application.load_tasks
+# SampleApp::Application.load_tasks

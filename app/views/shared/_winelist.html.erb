@@ -1,0 +1,8 @@
+<!-- % unless !@winelist_items || @winelist_items.empty? % -->
+<% unless @winelist_items.empty? %>
+  <table class="entries" summary="User entries">
+    <%= render :partial => 'shared/winelist_item', :collection => @winelist_items %>
+  </table>
+  <%= will_paginate @winelist_items %>
+<% end %>
+

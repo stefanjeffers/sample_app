@@ -1,0 +1,20 @@
+  <table class="front" summary="For signed-in users">
+    <tr>
+      <td class="main">
+        <h1 class="micropost">What do you want to WINE about now?</h1>
+        <%= render 'shared/micropost_form' %>
+        <%= render 'shared/feed' %>
+      </td>
+      <td class="sidebar round">
+        <tr>
+          <%= render 'shared/user_info' %>
+          <%= render 'shared/stats' %>
+        </tr>
+        <tr>
+          <h1 class="entry">My Wine Collection:</h1>
+          <%= render 'shared/entry_form' %>
+          <%= render 'shared/wine_list' %>
+        </tr>
+      </td>
+    </tr>
+  </table>

@@ -1,6 +1,4 @@
-SampleApp::Application.routes.draw do
-
-  # get "sessions/new"
+WineApp::Application.routes.draw do
 
   resources :users do
     member do
@@ -10,6 +8,7 @@ SampleApp::Application.routes.draw do
   
   resources :sessions, :only => [:new, :create, :destroy]
   resources :microposts, :only => [:create, :destroy]
+  resources :entries, :only => [:create, :destroy]
   resources :relationships, :only => [:create, :destroy]
 
   match '/signup',  :to => 'users#new'

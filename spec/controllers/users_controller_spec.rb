@@ -68,7 +68,6 @@ describe UsersController do
     describe "for signed-in admin users" do
 
       before(:each) do
-        # @user = test_sign_in(Factory(:user))
         @user  = Factory(:user, :email => "admin@example.com", :admin => true)
         admin  = test_sign_in( @user )
         second = Factory(:user, :name => "Bob", :email => "another@example.com")
@@ -128,6 +127,25 @@ describe UsersController do
       response.should have_selector("span.content", :content => mp1.content)
       response.should have_selector("span.content", :content => mp2.content)
     end
+
+    describe "when it has followers" do
+
+      before(:each) do
+	# Already have user from above, and it doesn't need to be signed in at this point:
+      # @user = test_sign_in(Factory(:user))
+        other_user = Factory(:user, :email => Factory.next(:email))
+        other_user.follow!(@user)
+      end
+
+      it "should have the right follower/following counts" do
+        get :show, :id => @user
+        response.should have_selector("a", :href => following_user_path(@user),
+                                           :content => "0 following")
+        response.should have_selector("a", :href => followers_user_path(@user),
+                                           :content => "1 follower")
+      end
+    end
+
   end
 
   describe "GET 'new'" do
@@ -208,7 +226,7 @@ describe UsersController do
 
       it "should have a welcome message" do
         post :create, :user => @attr
-        flash[:success].should =~ /welcome to the sample app/i
+        flash[:success].should =~ /welcome to the wine app/i
       end
 
       it "should sign the user in" do
